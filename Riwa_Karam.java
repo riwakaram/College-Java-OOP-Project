@@ -1,8 +1,8 @@
 
 /**
- * Title of the Project: Sudoku
+ * Title of the Project: Sudoku Class
  *
- * Date: Saturday, February 27, 2021
+ * Date: Friday, March 5, 2021
  *
  * @author riwakaram
  *
@@ -17,13 +17,13 @@
  * rows and columns, and the zeros are displayed as spaces
  *
  * 2. generateEmptyElementsArray:
- * This method takes a 2D array and returns a 2D array with elements equal to 1
- * if its corresponding elements in the parameter is different than 0
+ * This method returns a 2D array with elements equal to 1 if its corresponding
+ * elements in the 2D array initialGrid is different than 0
  * Otherwise, the elements are equal to 0
  *
  * 3. countMissedValues:
- * This method takes a 2D array and returns the number of the values that are
- * equal to zero in the parameter
+ * This method returns the number of the values that are equal to zero in the
+ * 2D array initialGrid
  * (the return value is the number of values that must be guessed by the player)
  *
  * 4. addValueInACell:
@@ -38,11 +38,11 @@
  *
  * 5. existInRow:
  * This method checks if its parameter num exists or not in the row (row) of the
- * parameter sud (2D array)
+ * 2D array initialGrid
  *
  * 6. existInCol:
  * This method checks if its parameter num exists or not in the column (col) of
- * the parameter sud (2D array)
+ * the 2D array initialGrid
  *
  * 7. existInBlock:
  * This method checks if its parameter num exists or not in the block related to
@@ -52,15 +52,41 @@
  * This method is the method that connects all the other methods in order to run
  * the game properly; the game ends when the user wins or loses all of his/her
  * attempts
- *
- * 9. the main method:
- * It contains the 2D array that represents the grid of the Sudoku
- * It calls the method runGame using that array
- *
  */
 import java.util.Scanner;
 
 public class Sudoku {
+
+    public int[][] initialGrid; //2D array to store the (unplayed at first) Sudoku grid
+    private int nbOfErrors = 0; //number of errors committed by the player (0 at first)
+    private static final int nbrOfAllowedErrors = 5; //number of errors allowed per game
+    private int[][] emptyElementsArray; //2D array to store the binary array
+    private int nbrOfMissingDigits; //number of digits to be guessed by the player
+
+    /*
+    Constructor Sudoku(int[][]sud):
+    
+    - Purpose:
+    This constructor stores the sudoku grid (in the main method), in the data
+    field initialGrid, to be able to play the game.
+    
+    - Pre-conditions:
+    It takes a 2D array as parameter
+    
+    -Post-conditions:
+    No post-conditions
+     */
+    public Sudoku(int[][] sud) {
+
+        initialGrid = new int[sud.length][sud[0].length];
+
+        for (int row = 0; row < sud.length; row++) {
+            for (int col = 0; col < sud[0].length; col++) {
+                initialGrid[row][col] = sud[row][col];
+            }
+        }
+
+    }
 
     /*
     Method displaySudoku:
@@ -71,15 +97,13 @@ public class Sudoku {
     The zeros are displayed as spaces
     
     - Pre-conditions:
-    It takes a 2D array as parameter
-    The array should (logically) be of dimension [9][9] since it represents a
-    Sudoku grid
+    No pre-conditions
     
     - Post-conditions:
     This method has no return value
     It will only display the array
      */
-    public static void displaySudoku(int sud[][]) {
+    private void displaySudoku() {
 
         /*
         Printing empty spaces to align and indent the display result
@@ -92,30 +116,30 @@ public class Sudoku {
 
         /*
         This loop displays "col" + the column number until the counter col
-        reaches the length of the array sud (column length)
+        reaches the length of the array initialGrid (column length)
          */
-        for (int col = 1; col <= sud[0].length; col++) {
+        for (int col = 1; col <= initialGrid[0].length; col++) {
 
             System.out.printf("%-8s", "col" + col);
 
         }
 
-        //This loop displays the array sud (Sudoku grid) and the row number
-        for (int row = 0; row < sud.length; row++) {
+        //This loop displays the array initialGrid and the row number
+        for (int row = 0; row < initialGrid.length; row++) {
 
             System.out.println(""); //new line for each iteration
 
             System.out.print("Row" + (row + 1) + "\t"); //row number for each line
 
             //This loop displays each row
-            for (int col = 0; col < sud[0].length; col++) {
+            for (int col = 0; col < initialGrid[0].length; col++) {
 
                 /*
                 if the element of index [row][col] is different than 0, print it
                 else (equal to 0), print empty spaces
                  */
-                if (sud[row][col] != 0) {
-                    System.out.printf("%-8d", sud[row][col]);
+                if (initialGrid[row][col] != 0) {
+                    System.out.printf("%-8d", initialGrid[row][col]);
                 } else {
                     System.out.printf("%8s", "");
                 }
@@ -138,26 +162,24 @@ public class Sudoku {
     assigned or not and if the user already assigned an element or not
     
     - Pre-conditions:
-    It takes a 2D array as parameter
-    The array should (logically) be of dimension [9][9] since it represents a
-    Sudoku grid
+    No pre-conditions
     
     - Post-conditions:
     It returns a 2D binary array, containing only zeros and ones (int[][])
     The zeros represent an empty element and the ones mean that the element was
     initially assigned
      */
-    public static int[][] generateEmptyElementsArray(int[][] sud) {
+    private int[][] generateEmptyElementsArray() {
 
-        int numRow = sud.length; //the number of rows of the parameter 2D array
-        int numCol = sud[0].length; //the number of columns of the parameter 2D array
+        int numRow = initialGrid.length; //the number of rows of the 2D array initialGrid
+        int numCol = initialGrid[0].length; //the number of columns of the 2D array initialGrid
 
-        //binary sudoku array with same dimension as the parameter array:
+        //binary sudoku array with same dimension as initialGrid:
         int[][] binSud = new int[numRow][numCol];
 
         /*
         These nested for loops store zeros and ones in the binary sudoku array
-        If an element of the parameter array is different than 0, we store 1 in
+        If an element of initialGrid is different than 0, we store 1 in
         the corresponding element of binSud
         If it was 0 (else), we store 0
          */
@@ -165,7 +187,7 @@ public class Sudoku {
 
             for (int col = 0; col < numCol; col++) {
 
-                if (sud[row][col] != 0) {
+                if (initialGrid[row][col] != 0) {
                     binSud[row][col] = 1;
                 } else {
                     binSud[row][col] = 0;
@@ -187,27 +209,25 @@ public class Sudoku {
     This number will be the number of values the player must input into the grid
     
     - Pre-conditions;
-    It takes a 2D array as parameter
-    The array should (logically) be of dimension [9][9] since it represents a
-    Sudoku grid
+    No pre-conditions
     
     - Post-conditions:
     It returns the number of guesses (integer)
      */
-    public static int countMissedValues(int[][] sud) {
+    private int countMissedValues() {
 
         int numGuess = 0; //the number of empty values, of guesses
 
         /*
-        These nested for loops will search the parameter array for elements with
-        value 0
+        These nested for loops will search the 2D array initialGrid for elements
+        with value 0
         If it finds any, it increments numGuess by 1 each time
          */
-        for (int row = 0; row < sud.length; row++) {
+        for (int row = 0; row < initialGrid.length; row++) {
 
-            for (int col = 0; col < sud[0].length; col++) {
+            for (int col = 0; col < initialGrid[0].length; col++) {
 
-                if (sud[row][col] == 0) {
+                if (initialGrid[row][col] == 0) {
                     numGuess++;
                 }
 
@@ -228,10 +248,8 @@ public class Sudoku {
     existInRow, existInColumn and existInBlock
     
     - Pre-conditions:
-    It takes the integer value the user wants to add, the row and column where
-    the value must be added and the 2D array (sudoku grid)
-    The array should (logically) be of dimension [9][9] since it represents a
-    Sudoku grid
+    It takes the integer value the user wants to add and the row and column
+    where the value must be added
     
     - Post-conditions:
     It will return:
@@ -242,17 +260,17 @@ public class Sudoku {
     3 if the value num exists already in another cell of the same column
     4 if the value num exists already in another cell of the same block
      */
-    public static int addValueInACell(int num, int row, int col, int[][] sud) {
+    private int addValueInACell(int num, int row, int col) {
 
-        if (existInRow(num, row, sud)) {
+        if (existInRow(num, row)) {
             return 2;
         }
 
-        if (existInCol(num, col, sud)) {
+        if (existInCol(num, col)) {
             return 3;
         }
 
-        if (existInBlock(num, row, col, sud)) {
+        if (existInBlock(num, row, col)) {
             return 4;
         }
 
@@ -262,14 +280,14 @@ public class Sudoku {
         the array
         This is why there is no need to put these conditions on num anymore
          */
-        if (sud[row][col] == 0) { //if it was zero, it means it was empty
+        if (initialGrid[row][col] == 0) { //if it was zero, it means it was empty
 
-            sud[row][col] = num;
+            initialGrid[row][col] = num;
             return 0;
 
         } else {                  //else, it is being reassigned by the user
 
-            sud[row][col] = num;
+            initialGrid[row][col] = num;
             return 1;
 
         }
@@ -284,25 +302,22 @@ public class Sudoku {
     same row as the row where the user wants to insert that value
     
     - Pre-conditions:
-    It takes the integer value num, the row where num may be stored and the 2D
-    array (sudoku grid)
-    The array should (logically) be of dimension [9][9] since it represents a
-    Sudoku grid
+    It takes the integer value num and the row where num may be stored
     
     -Post-conditions:
     It returns a boolean expression
     If the value num already exists in the same row, it returns true
     If not, it returns false
      */
-    public static boolean existInRow(int num, int row, int[][] sud) {
+    private boolean existInRow(int num, int row) {
 
         /*
         This for loop searches, in the row of the value num, for an element
         equal to num
          */
-        for (int col = 0; col < sud[0].length; col++) {
+        for (int col = 0; col < initialGrid[0].length; col++) {
 
-            if (num == sud[row][col]) {
+            if (num == initialGrid[row][col]) {
                 return true;
             }
 
@@ -320,25 +335,22 @@ public class Sudoku {
     same column as the column where the user wants to insert that value
     
     - Pre-conditions:
-    It takes the integer value num, the column where num may be stored and the
-    2D array (sudoku grid)
-    The array should (logically) be of dimension [9][9] since it represents a
-    Sudoku grid
+    It takes the integer value num and the column where num may be stored
     
     -Post-conditions:
     It returns a boolean expression
     If the value num already exists in the same column, it returns true
     If not, it returns false
      */
-    public static boolean existInCol(int num, int col, int[][] sud) {
+    private boolean existInCol(int num, int col) {
 
         /*
         This for loop searches, in the column of the value num, for an element
         equal to num
          */
-        for (int row = 0; row < sud.length; row++) {
+        for (int row = 0; row < initialGrid.length; row++) {
 
-            if (num == sud[row][col]) {
+            if (num == initialGrid[row][col]) {
                 return true;
             }
 
@@ -356,17 +368,14 @@ public class Sudoku {
     same block (3x3) as the block where the user wants to insert that value
     
     - Pre-conditions:
-    It takes the integer value num, the row and column where num may be stored
-    and the 2D array (sudoku grid)
-    The array should (logically) be of dimension [9][9] since it represents a
-    Sudoku grid
+    It takes the integer value num and the row and column where num may be stored
     
     -Post-conditions:
     It returns a boolean expression
     If the value num already exists in the same block, it returns true
     If not, it returns false
      */
-    public static boolean existInBlock(int num, int row, int col, int[][] sud) {
+    private boolean existInBlock(int num, int row, int col) {
 
         /*
         We need to search in the block of a certain element in the array
@@ -388,7 +397,7 @@ public class Sudoku {
 
             for (int c = newCol; c <= (newCol + 2); c++) {
 
-                if (num == sud[r][c]) {
+                if (num == initialGrid[r][c]) {
                     return true;
                 }
 
@@ -407,15 +416,13 @@ public class Sudoku {
     This method will run the Sudoku game until the player wins or loses
     
     - Pre-conditions:
-    It takes a 2D array as parameter
-    The array should (logically) be of dimension [9][9] since it represents a
-    Sudoku grid
+    No pre-conditions
     
     - Post-conditions:
     This method will interact with the player until the game ends (player wins
     or loses)
      */
-    public static void runGame(int[][] sud) {
+    public void runGame() {
 
         Scanner input = new Scanner(System.in);
 
@@ -423,18 +430,14 @@ public class Sudoku {
         int rowNumber; //row number (must be between 1 and 9)
         int colNumber; //column number (must be between 1 and 9)
         int resultOfAddValueInACell; //store the return value of the method addValueInACell
-        int nbOfErrors = 0; //number of errors committed by the player (0 at first)
-        int nbrOfAllowedErrors = 5; //number of errors allowed per game
-        int[][] emptyElementsArray = new int[9][9]; //2D array to store the binary array
-        int nbrOfMissingDigits; //number of digits to be guessed by the player
 
         //emptyElementsArray becomes the corresponding binary array to sud
-        emptyElementsArray = generateEmptyElementsArray(sud);
+        emptyElementsArray = generateEmptyElementsArray();
 
         //nbrOfMissingDigits will be the number of elements to be entered by the user
-        nbrOfMissingDigits = countMissedValues(sud);
+        nbrOfMissingDigits = countMissedValues();
 
-        displaySudoku(sud);
+        displaySudoku();
 
         /*
         This do..while represents the interaction between the code and the user
@@ -524,7 +527,7 @@ public class Sudoku {
             if it can be added or not
             The return value is stored in resultOfAddValueInACell
              */
-            resultOfAddValueInACell = addValueInACell(theValue, rowNumber - 1, colNumber - 1, sud);
+            resultOfAddValueInACell = addValueInACell(theValue, rowNumber - 1, colNumber - 1);
 
             /*
             This switch statement checks which case is the resultOfAddValueInACell
@@ -580,42 +583,9 @@ public class Sudoku {
                 break;
             }
 
-            displaySudoku(sud); //diplay the grid for each iteration
+            displaySudoku(); //diplay the grid for each iteration
 
         } while (true);
-
-    }
-
-    /*
-    Main method:
-    
-    It contains the 2D array (sudoku grid) and it calls the method runGame using
-    that array
-     */
-    public static void main(String[] args) {
-
-        int[][] sudoku = {
-            {9, 0, 3, 5, 6, 0, 7, 0, 4},
-            {0, 5, 4, 1, 0, 7, 0, 8, 6},
-            {6, 8, 7, 0, 0, 2, 5, 1, 0},
-            {0, 0, 5, 9, 2, 0, 1, 7, 0},
-            {7, 2, 0, 8, 0, 1, 9, 4, 3},
-            {0, 9, 0, 0, 7, 3, 6, 0, 2},
-            {1, 0, 2, 0, 3, 4, 8, 0, 0},
-            {4, 0, 9, 6, 0, 0, 0, 0, 1},
-            {5, 3, 8, 2, 0, 9, 0, 6, 7}};
-
-        /*int [][] solutionGrid = {
-		{9, 1, 3, 5, 6, 8, 7, 2, 4},
-		{2, 5, 4, 1, 9, 7, 3, 8, 6},
-		{6, 8, 7, 3, 4, 2, 5, 1, 9}, 
-		{3, 4, 5, 9, 2, 6, 1, 7, 8},
-		{7, 2, 6, 8, 5, 1, 9, 4, 3}, 
-		{8, 9, 1, 4, 7, 3, 6, 5, 2}, 
-		{1, 6, 2, 7, 3, 4, 8, 9, 5}, 
-		{4, 7, 9, 6, 8, 5, 2, 3, 1}, 
-		{5, 3, 8, 2, 1, 9, 4, 6, 7}};*/
-        runGame(sudoku);
 
     }
 
